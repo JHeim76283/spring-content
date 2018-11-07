@@ -10,16 +10,19 @@ import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.content.commons.annotations.ContentId;
+import org.springframework.content.commons.annotations.HandleAfterSetContent;
+import org.springframework.content.commons.annotations.HandleBeforeUnsetContent;
 import org.springframework.content.commons.annotations.StoreEventHandler;
 import org.springframework.content.commons.repository.StoreAccessException;
 import org.springframework.content.commons.repository.events.AbstractStoreEventListener;
 import org.springframework.content.commons.repository.events.AfterSetContentEvent;
 import org.springframework.content.commons.repository.events.BeforeUnsetContentEvent;
 import org.springframework.content.commons.utils.BeanUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.util.Assert;
 
 @StoreEventHandler
-public class SolrIndexer extends AbstractStoreEventListener<Object> {
+public class SolrIndexer {
 
 	private SolrClient solrClient;
 	private SolrProperties properties;
@@ -33,7 +36,8 @@ public class SolrIndexer extends AbstractStoreEventListener<Object> {
 		this.properties = properties;
 	}
 
-	@Override
+	@HandleAfterSetContent
+	@Order(100)
 	protected void onAfterSetContent(AfterSetContentEvent event) {
 		Object contentEntity = event.getSource();
 		if (BeanUtils.hasFieldWithAnnotation(contentEntity, ContentId.class) == false) {
@@ -69,7 +73,8 @@ public class SolrIndexer extends AbstractStoreEventListener<Object> {
 		}
 	}
 
-	@Override
+	@HandleBeforeUnsetContent
+	@Order(100)
 	protected void onBeforeUnsetContent(BeforeUnsetContentEvent event) {
 		Object contentEntity = event.getSource();
 		if (BeanUtils.hasFieldWithAnnotation(contentEntity, ContentId.class) == false) {
